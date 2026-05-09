@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useStore } from '@/lib/store';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { Disclaimer } from '@/components/ui/disclaimer';
 import { LayoutDashboard, Users, ClipboardCheck, Bell, StickyNote, BarChart3, Menu, LogOut } from 'lucide-react';
 
@@ -32,7 +33,11 @@ export default function CoachLayout({ children }: { children: React.ReactNode })
 
   const unresolvedAlerts = coachAlerts.filter(a => !a.resolved).length;
 
-  function handleLogout() {
+  async function handleLogout() {
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    }
     logout();
     router.push('/login');
   }

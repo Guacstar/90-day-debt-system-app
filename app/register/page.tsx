@@ -3,16 +3,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useStore } from '@/lib/store';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Disclaimer } from '@/components/ui/disclaimer';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const register = useStore(s => s.register);
+  const registerDemo = useStore(s => s.registerDemo);
+  const hydrateFromSupabase = useStore(s => s.hydrateFromSupabase);
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '', confirm: '' });
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
+  const supabaseMode = isSupabaseConfigured();
 
   function set(field: string, value: string) {
     setForm(f => ({ ...f, [field]: value }));
@@ -21,6 +25,7 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setInfo('');
     if (form.password !== form.confirm) {
       setError('Passwords do not match.');
       return;
@@ -30,14 +35,42 @@ export default function RegisterPage() {
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 300));
-    const result = register({ full_name: form.full_name, email: form.email, phone: form.phone, password: form.password, role: 'client' });
-    setLoading(false);
-    if (!result.success) {
-      setError(result.error || 'Registration failed.');
-      return;
+
+    if (supabaseMode) {
+      const supabase = createClient();
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            full_name: form.full_name,
+            phone: form.phone,
+            role: 'client',
+          },
+        },
+      });
+      setLoading(false);
+      if (authError) {
+        setError(authError.message);
+        return;
+      }
+      // If email confirmation is required, no session will be present yet.
+      if (!data.session) {
+        setInfo('Account created! Please check your email to confirm your address, then sign in.');
+        return;
+      }
+      await hydrateFromSupabase();
+      router.push('/onboarding');
+    } else {
+      await new Promise(r => setTimeout(r, 300));
+      const result = registerDemo({ full_name: form.full_name, email: form.email, phone: form.phone, password: form.password, role: 'client' });
+      setLoading(false);
+      if (!result.success) {
+        setError(result.error || 'Registration failed.');
+        return;
+      }
+      router.push('/onboarding');
     }
-    router.push('/onboarding');
   }
 
   return (
@@ -59,6 +92,7 @@ export default function RegisterPage() {
             <Input label="Password" type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="At least 6 characters" required />
             <Input label="Confirm password" type="password" value={form.confirm} onChange={e => set('confirm', e.target.value)} placeholder="Re-enter password" required />
             {error && <p className="text-sm text-red-600">{error}</p>}
+            {info && <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg p-3">{info}</p>}
             <Button type="submit" className="w-full" size="lg" loading={loading}>
               Create account
             </Button>

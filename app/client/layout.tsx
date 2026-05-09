@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useStore } from '@/lib/store';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { Disclaimer } from '@/components/ui/disclaimer';
 import {
   LayoutDashboard, CreditCard, DollarSign, Scissors,
@@ -36,7 +37,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   if (!currentUser || currentUser.role !== 'client') return null;
 
-  function handleLogout() {
+  async function handleLogout() {
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    }
     logout();
     router.push('/login');
   }

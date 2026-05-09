@@ -56,12 +56,13 @@ export default function OnboardingPage() {
   const showBehindWarning =
     form.current_on_rent === 'no' || form.current_on_food_utilities === 'no';
 
-  function handleFinish() {
+  async function handleFinish() {
     if (!currentUser) return;
-    const coachId = 'coach-orlando-001';
-    createClient({
+    // In Supabase mode, the trigger will associate the client with no coach by default —
+    // a coach can later be assigned. In demo mode, default to the seeded Orlando Coach.
+    await createClient({
       user_id: currentUser.id,
-      coach_id: coachId,
+      coach_id: null,
       program_start_date: form.program_start_date,
       program_status: 'active',
       monthly_income: parseFloat(form.monthly_income) || 0,

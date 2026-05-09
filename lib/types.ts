@@ -13,7 +13,7 @@ export interface User {
 export interface Client {
   id: string;
   user_id: string;
-  coach_id: string;
+  coach_id: string | null;
   program_start_date: string;
   program_end_date?: string;
   program_status: ProgramStatus;
