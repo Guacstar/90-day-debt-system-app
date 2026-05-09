@@ -1,0 +1,46 @@
+export type Role = "client" | "coach";
+export type ProgramStatus = "Onboarding" | "Active" | "Needs attention" | "Completed" | "Paused" | "Referred out";
+export type PayoffMethod = "Snowball" | "Avalanche";
+export type DebtStatus = "Current" | "Late" | "In collections" | "Paid off" | "Needs attention";
+export type AlertSeverity = "Low" | "Medium" | "High";
+
+export type User = { id: string; role: Role; fullName: string; email: string; phone: string };
+export type Client = {
+  id: string;
+  userId: string;
+  coachId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  programStartDate: string;
+  programEndDate: string;
+  programStatus: ProgramStatus;
+  monthlyIncome: number;
+  incomeFrequency: string;
+  estimatedTotalDebt: number;
+  currentEmergencyFund: number;
+  mainGoal: string;
+  startingStressLevel: number;
+  startingConfidenceLevel: number;
+  currentStressLevel: number;
+  currentConfidenceLevel: number;
+  nextCoachingCallDate: string;
+  payoffMethod: PayoffMethod;
+  onboarding: {
+    currentOnRentMortgage: boolean;
+    currentOnFoodUtilities: boolean;
+    consideringBankruptcy: boolean;
+    legalAction: boolean;
+    wantsNegotiationHelp: boolean;
+    wantsDebtSettlementHelp: boolean;
+  };
+};
+export type Debt = { id: string; clientId: string; creditorName: string; debtType: string; startingBalance: number; currentBalance: number; interestRate: number; minimumPayment: number; dueDate: string; autopayEnabled: boolean; status: DebtStatus; notes: string };
+export type CashFlowEntry = { id: string; clientId: string; category: string; amount: number; entryType: "income" | "expense"; expenseType?: "fixed" | "variable"; essential: boolean; notes: string };
+export type SpendingLeak = { id: string; clientId: string; name: string; category: string; monthlyCost: number; decision: "Keep" | "Cancel" | "Reduce" | "Review later"; potentialMonthlySavings: number; notes: string };
+export type Payment = { id: string; clientId: string; debtId: string; dueDate: string; minimumAmountDue: number; amountPaid: number; extraPaymentAmount: number; paymentStatus: "Upcoming" | "Paid" | "Missed" | "Autopay enabled" | "Needs attention"; autopayStatus: boolean; notes: string };
+export type WeeklyCheckin = { id: string; clientId: string; weekNumber: number; avoidedNewDebt: boolean; madeAllRequiredPayments: boolean; stayedWithinWeeklySpendingLimit: boolean; extraDebtPayment: number; totalDebtWentUp: boolean; biggestMoneyWin: string; biggestChallenge: string; spendingTemptation: string; helpNeeded: string; stressLevel: number; confidenceLevel: number; coachResponse: string; submittedAt: string; reviewedAt?: string };
+export type EmergencyFund = { id: string; clientId: string; goalAmount: number; currentBalance: number; weeklyContribution: number; monthlyContribution: number; goalType: string; notes: string };
+export type ProgramTask = { id: string; clientId: string; phase: string; weekRange: string; taskName: string; taskDescription: string; completed: boolean; completedAt?: string };
+export type CoachNote = { id: string; clientId: string; coachId: string; noteType: string; noteContent: string; followUpNeeded: boolean; followUpDueDate?: string; createdAt: string };
+export type CoachAlert = { id: string; clientId: string; alertType: string; severity: AlertSeverity; alertMessage: string; resolved: boolean; createdAt: string };
