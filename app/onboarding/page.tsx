@@ -8,7 +8,6 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertBanner } from '@/components/ui/alert-banner';
 import { Disclaimer } from '@/components/ui/disclaimer';
-import { generateId, now } from '@/lib/utils';
 import { Client } from '@/lib/types';
 
 const STEPS = ['Your Info', 'Financial Snapshot', 'Your Goals', 'Risk Check'];
